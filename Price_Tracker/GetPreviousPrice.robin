@@ -1,0 +1,77 @@
+
+FUNCTION GetPreviousPrice GLOBAL
+    Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: $'''C:\\Users\\sebastian\'s\\OneDrive\\Documents\\RPAProjects\\PriceScrapper\\competitor_prices.xlsx''' Visible: True ReadOnly: False UseMachineLocale: False Instance=> ExcelInstance
+    Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance Name: $'''CurrentPrices'''
+    Excel.ReadFromExcel.ReadAllCells Instance: ExcelInstance GetCellContentsMode: Excel.GetCellContentsMode.TypedValues FirstLineIsHeader: True RangeValue=> CurrentDataTable
+    SET LoopIndex TO 0
+    Text.ChangeCase Text: Item NewCase: Text.CaseOption.LowerCase Result=> CleanItem
+    Text.SplitText.Split Text: CleanItem StandardDelimiter: Text.StandardDelimiter.Space DelimiterTimes: 1 Result=> ItemParts
+    SET Brand TO ItemParts[0]
+    SET Model TO ItemParts[1]
+    IF CurrentDataTable.RowsCount = 0 THEN
+        SET RowIndex TO 2
+        SET IsFound TO $'''False'''
+        SET PrevoiusPrice TO 0
+    ELSE
+        LOOP FOREACH CurrentRow IN CurrentDataTable
+            Text.ChangeCase Text: CurrentRow['ProductName'] NewCase: Text.CaseOption.LowerCase Result=> PName
+            IF Contains(PName, Model, False) THEN
+                SET RowIndex TO LoopIndex
+                Variables.IncreaseVariable Value: RowIndex IncrementValue: 2
+                SET IsFound TO $'''True'''
+                EXIT LOOP
+            END
+            Variables.IncreaseVariable Value: LoopIndex IncrementValue: 1
+        END
+    END
+    IF IsFound = $'''True''' THEN
+        Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CleanPrice Column: $'''D''' Row: RowIndex
+        Excel.SaveExcel.Save Instance: ExcelInstance
+    END
+    IF IsFound = $'''False''' THEN
+        Excel.GetFirstFreeColumnRow Instance: ExcelInstance FirstFreeColumn=> FirstFreeColumn2 FirstFreeRow=> FirstFreeRow2
+        SET RowIndex TO FirstFreeRow2
+        SET PreviousPrice TO 0
+        CALL CurrentPrice_Excel
+    END
+    Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance Name: $'''PriceHistory'''
+    Excel.ReadFromExcel.ReadAllCells Instance: ExcelInstance GetCellContentsMode: Excel.GetCellContentsMode.TypedValues FirstLineIsHeader: True RangeValue=> HistoryDataTable
+    SET HistoryPrice TO 0
+    SET TotalRows TO HistoryDataTable.RowsCount
+    SET Index TO TotalRows
+    Variables.DecreaseVariable Value: Index DecrementValue: 1
+    LOOP WHILE (Index) >= (0)
+        SET HRow TO HistoryDataTable[Index]
+        Text.ChangeCase Text: HRow['ProductName'] NewCase: Text.CaseOption.LowerCase Result=> CleanHistoryName
+        IF Contains(CleanHistoryName, Model, False) THEN
+            SET HistoryPrice TO HRow['Price']
+            Display.ShowMessageDialog.ShowMessage Title: CleanHistoryName Message: HistoryPrice Icon: Display.Icon.None Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed
+            EXIT LOOP
+        END
+        Variables.DecreaseVariable Value: Index DecrementValue: 1
+    END
+    IF HistoryPrice = 0 THEN
+        SET PriceChangePercent TO 0
+    ELSE
+        SET PriceChangePercent TO ((CleanPrice - HistoryPrice) / HistoryPrice) * 100
+        Variables.TruncateNumber.RoundNumber Number: PriceChangePercent DecimalPlaces: 3 Result=> PriceChangeRounded
+    END
+    Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance Name: $'''CurrentPrices'''
+    IF PriceChangeRounded >= 5 THEN
+        Email.SendEmail.AuthenticateAndSend SMTPServer: $'''smtp.gmail.com''' Port: 465 EnableSSL: True Username: $'''teenajm15@gmail.com''' Password: $'''mpif vtkj yrvo lvbc''' AcceptUntrustedCertificates: False SendFrom: $'''teenajm15@gmail.com''' SendTo: $'''teenajm15@gmail.com''' Subject: $'''🚨 Price Alert: %ProductName% changed by %PriceChangeRounded%''' Body: $'''PRICE ALERT - Significant Change Detected!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Product: %ProductName%
+Competitor: Amazon India
+
+Previous Price: ₹%PreviousPrice%
+Current Price: ₹%CleanPrice%
+
+Change: %PriceChangeRounded%
+
+Date: %CurrentDate%
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This is an automated alert from your Price Scraper Bot.''' IsBodyHtml: False
+    END
+END FUNCTION

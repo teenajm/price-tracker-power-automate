@@ -1,0 +1,9 @@
+
+FUNCTION CurrentPrice_Excel GLOBAL
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CurrentDate Column: $'''A''' Row: RowIndex
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: ProductName Column: $'''B''' Row: RowIndex
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: $'''Amazon''' Column: $'''C''' Row: RowIndex
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CleanPrice Column: $'''D''' Row: RowIndex
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: $'''INR''' Column: $'''E''' Row: RowIndex
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: $'''https://www.amazon.in/''' Column: $'''F''' Row: RowIndex
+END FUNCTION

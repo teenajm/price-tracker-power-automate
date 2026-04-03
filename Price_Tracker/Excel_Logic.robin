@@ -1,0 +1,20 @@
+
+FUNCTION Excel_Logic GLOBAL
+    SET AlertThreshold TO 5
+    Excel.SetActiveWorksheet.ActivateWorksheetByName Instance: ExcelInstance Name: $'''PriceHistory'''
+    Excel.GetFirstFreeColumnRow Instance: ExcelInstance FirstFreeColumn=> FirstFreeColumn FirstFreeRow=> FirstFreeRow
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CurrentDate Column: $'''A''' Row: FirstFreeRow
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: ProductName Column: $'''B''' Row: FirstFreeRow
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: $'''Amazon''' Column: $'''C''' Row: FirstFreeRow
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: CleanPrice Column: $'''D''' Row: FirstFreeRow
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: PriceChangeRounded Column: $'''E''' Row: FirstFreeRow
+    SET AlertFlag TO $'''Yes'''
+    IF PriceChangeRounded >= AlertThreshold THEN
+        SET AlertFlag TO $'''Yes'''
+    ELSE
+        SET AlertFlag TO $'''No'''
+    END
+    Excel.WriteToExcel.WriteCell Instance: ExcelInstance Value: AlertFlag Column: $'''F''' Row: FirstFreeRow
+    Excel.SaveExcel.Save Instance: ExcelInstance
+    Excel.CloseExcel.Close Instance: ExcelInstance
+END FUNCTION

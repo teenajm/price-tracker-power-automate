@@ -1,0 +1,8 @@
+SET ProductList TO ['iPhone 17', 'Galaxy s26 ultra', 'oppo Reno15']
+SET IsFound TO $'''False'''
+WebAutomation.LaunchChrome.LaunchChrome Url: $'''https://www.amazon.in/''' WindowState: WebAutomation.BrowserWindowState.Maximized ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 80 PiPUserDataFolderMode: WebAutomation.PiPUserDataFolderModeEnum.AutomaticProfile TargetDesktop: $'''{\"DisplayName\":\"Local computer\",\"Route\":{\"ServerType\":\"Local\",\"ServerAddress\":\"\"},\"DesktopType\":\"local\"}''' BrowserInstance=> Browser
+LOOP FOREACH Item IN ProductList
+    CALL GetPriceFromAmazon
+    CALL GetPreviousPrice
+    CALL Excel_Logic
+END
