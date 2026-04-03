@@ -11,7 +11,7 @@ End-to-end price tracking system using Power Automate, Excel, and Power BI with 
 - Power Automate Desktop
 - Excel
 - Power BI
-
+## 📁 Flow Structure
 ## 📊 Business Impact
 - Saved 10+ hours/week of manual work
 - Improved data accuracy from ~85% to 100%
