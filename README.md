@@ -12,6 +12,14 @@ End-to-end price tracking system using Power Automate, Excel, and Power BI with 
 - Excel
 - Power BI
 ## 📁 Flow Structure
+
+| File | Description |
+|------|-------------|
+| `Main.robin` | Entry point, orchestrates all subflows |
+| `GetPriceFromAmazon.robin` | Scrapes product name & price from Amazon |
+| `GetPreviousPrice.robin` | Reads historical price from Excel |
+| `Excel_Logic.robin` | Calculates price change & percentage |
+| `CurrentPrice_Excel.robin` | Writes current price to Excel |
 ## 📊 Business Impact
 - Saved 10+ hours/week of manual work
 - Improved data accuracy from ~85% to 100%
